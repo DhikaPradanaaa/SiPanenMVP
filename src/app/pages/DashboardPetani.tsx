@@ -5,7 +5,7 @@ import {
   Leaf, TrendingUp, TrendingDown, CloudSun, CloudRain, Sun, Droplets,
   Plus, Package, Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2,
   Clock, Truck, CreditCard, BookOpen, ChevronRight, Eye, Minus,
-  Sparkles, ThermometerSun, Wind, Brain,
+  Sparkles, ThermometerSun, Wind, Brain, MapPin,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, AreaChart, Area } from "recharts";
 
@@ -20,9 +20,9 @@ const hargaKomoditas = [
 ];
 
 const stokPanen = [
-  { id: 1, komoditas: "Padi", luas: "2.5 Ha", estimasiPanen: "28 Mar 2026", volume: "8.5 Ton", status: "Siap Panen" },
-  { id: 2, komoditas: "Jagung", luas: "1.8 Ha", estimasiPanen: "15 Apr 2026", volume: "5.2 Ton", status: "Masa Tanam" },
-  { id: 3, komoditas: "Cabai", luas: "0.5 Ha", estimasiPanen: "20 Apr 2026", volume: "1.8 Ton", status: "Masa Tanam" },
+  { id: 1, komoditas: "Padi", luas: "2.5 Ha", estimasiPanen: "28 Mar 2026", volume: "8.5 Ton", status: "Siap Panen", lokasi: "Blok A – Desa Sukamaju" },
+  { id: 2, komoditas: "Jagung", luas: "1.8 Ha", estimasiPanen: "15 Apr 2026", volume: "5.2 Ton", status: "Masa Tanam", lokasi: "Blok B – Desa Ciawi" },
+  { id: 3, komoditas: "Cabai", luas: "0.5 Ha", estimasiPanen: "20 Apr 2026", volume: "1.8 Ton", status: "Masa Tanam", lokasi: "Blok C – Desa Wanasari" },
 ];
 
 const permintaanDistributor = [
@@ -233,6 +233,13 @@ export function DashboardPetani() {
               <input placeholder="Volume (Ton)" className="h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-emerald-500" />
             </div>
             <input type="date" className="w-full h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm focus:outline-none focus:border-emerald-500" />
+            <div className="relative">
+              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400 pointer-events-none" />
+              <input
+                placeholder="Lokasi lahan (contoh: Blok A – Desa Sukamaju)"
+                className="w-full h-12 pl-10 pr-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
             <button className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20">
               Simpan
             </button>
@@ -247,7 +254,7 @@ export function DashboardPetani() {
               <h3 className="text-zinc-900 font-bold">{s.komoditas}</h3>
               <span className={`text-[10px] px-2.5 py-1 rounded-full font-medium border ${statusColors[s.status]}`}>{s.status}</span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2 mb-2.5">
               <div>
                 <div className="text-zinc-500 text-[10px]">Luas</div>
                 <div className="text-zinc-900 text-sm font-medium">{s.luas}</div>
@@ -261,6 +268,12 @@ export function DashboardPetani() {
                 <div className="text-emerald-600 text-sm font-bold">{s.volume}</div>
               </div>
             </div>
+            {s.lokasi && (
+              <div className="flex items-center gap-1.5 pt-2 border-t border-emerald-100">
+                <MapPin className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+                <span className="text-zinc-500 text-[11px]">{s.lokasi}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>
