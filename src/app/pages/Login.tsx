@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Sprout, Mail, Lock, Leaf, Truck, Factory, ArrowLeft, ChevronRight } from "lucide-react";
+import { Mail, Lock, Leaf, Truck, Factory, ArrowLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -156,7 +156,6 @@ export function Login() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl"
-                      required
                     />
                   </div>
                 </div>
@@ -172,7 +171,6 @@ export function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl"
-                      required
                     />
                   </div>
                 </div>

@@ -16,13 +16,45 @@ export function InputDataTanam() {
     tanggalTanam: "",
     luasLahan: "",
     lokasi: "",
-    estimasiPanen: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Data tanam berhasil disimpan!");
-    setTimeout(() => navigate("/dashboard"), 1500);
+    
+    if (!formData.komoditas) {
+      alert("Mohon pilih jenis komoditas terlebih dahulu.");
+      return;
+    }
+
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("Silakan login terlebih dahulu");
+      toast.error("Silakan login terlebih dahulu");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch("http://localhost:5001/api/plants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, userId })
+      });
+      if (res.ok) {
+        toast.success("Data tanam berhasil disimpan!");
+        setTimeout(() => navigate("/prediksi-panen"), 500);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Gagal menyimpan data");
+        toast.error(data.error || "Gagal menyimpan data");
+      }
+    } catch (err) {
+      alert("Gagal menghubungi server");
+      toast.error("Gagal menghubungi server");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -109,28 +141,12 @@ export function InputDataTanam() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="estimasiPanen" className="text-zinc-700">Estimasi Masa Panen (Hari)</Label>
-            <div className="relative">
-              <Calendar className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
-              <Input
-                id="estimasiPanen"
-                type="number"
-                placeholder="Contoh: 90"
-                value={formData.estimasiPanen}
-                onChange={(e) => setFormData({ ...formData, estimasiPanen: e.target.value })}
-                className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl"
-                required
-              />
-            </div>
-            <p className="text-xs text-zinc-500">Sistem akan mengoptimalkan prediksi berdasarkan data historis</p>
-          </div>
-
           <Button 
             type="submit" 
+            disabled={isLoading}
             className="w-full h-14 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all duration-200 mt-6"
           >
-            Simpan Data Tanam
+            {isLoading ? "Menyimpan..." : "Simpan Data Tanam"}
           </Button>
         </form>
       </div>

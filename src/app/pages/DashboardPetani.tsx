@@ -65,6 +65,44 @@ export function DashboardPetani() {
   const navigate = useNavigate();
   const tab = searchParams.get("tab") || "beranda";
   const [showAddPanen, setShowAddPanen] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    komoditas: "",
+    tanggalTanam: "",
+    luasLahan: "",
+    lokasi: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSavePanen = async () => {
+    if (!formData.komoditas || !formData.tanggalTanam || !formData.luasLahan || !formData.lokasi) {
+      alert("Mohon lengkapi semua data lahan (Komoditas, Luas, Tanggal, Lokasi)!");
+      return;
+    }
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("Silakan login terlebih dahulu");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("http://localhost:5001/api/plants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, userId })
+      });
+      if (res.ok) {
+        navigate("/dashboard/petani/ai");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Gagal menyimpan data");
+      }
+    } catch (err) {
+      alert("Gagal menghubungi server");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // ─── BERANDA TAB ───
   const TabBeranda = () => (
@@ -225,23 +263,44 @@ export function DashboardPetani() {
 
       {showAddPanen && (
         <div className="bg-white border border-emerald-300 rounded-2xl p-5 mb-5">
-          <h3 className="text-zinc-900 font-bold mb-4">Tambah Data Panen</h3>
+          <h3 className="text-zinc-900 font-bold mb-4">Tambah Data Panen (AI)</h3>
           <div className="space-y-3">
-            <input placeholder="Komoditas" className="w-full h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-emerald-500" />
-            <div className="grid grid-cols-2 gap-3">
-              <input placeholder="Luas (Ha)" className="h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-emerald-500" />
-              <input placeholder="Volume (Ton)" className="h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-emerald-500" />
-            </div>
-            <input type="date" className="w-full h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm focus:outline-none focus:border-emerald-500" />
+            <input 
+              placeholder="Komoditas (Padi, Jagung, Cabai, dll)" 
+              value={formData.komoditas}
+              onChange={(e) => setFormData({ ...formData, komoditas: e.target.value })}
+              className="w-full h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-emerald-500" 
+            />
+            <input 
+              placeholder="Luas (Ha)" 
+              type="number"
+              step="0.1"
+              value={formData.luasLahan}
+              onChange={(e) => setFormData({ ...formData, luasLahan: e.target.value })}
+              className="w-full h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-emerald-500" 
+            />
+            <input 
+              type="date" 
+              value={formData.tanggalTanam}
+              onChange={(e) => setFormData({ ...formData, tanggalTanam: e.target.value })}
+              className="w-full h-12 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm focus:outline-none focus:border-emerald-500" 
+            />
             <div className="relative">
               <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400 pointer-events-none" />
               <input
                 placeholder="Lokasi lahan (contoh: Blok A – Desa Sukamaju)"
+                value={formData.lokasi}
+                onChange={(e) => setFormData({ ...formData, lokasi: e.target.value })}
                 className="w-full h-12 pl-10 pr-4 bg-emerald-50 border border-emerald-200 rounded-xl text-zinc-900 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-emerald-500"
               />
             </div>
-            <button className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20">
-              Simpan
+            <p className="text-xs text-zinc-500 text-center mb-1">Volume akan diprediksi otomatis oleh AI</p>
+            <button 
+              onClick={handleSavePanen}
+              disabled={isSubmitting}
+              className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20"
+            >
+              {isSubmitting ? "Menyimpan..." : "Simpan & Analisis AI"}
             </button>
           </div>
         </div>

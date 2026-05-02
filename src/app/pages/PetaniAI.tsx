@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -34,7 +34,9 @@ import {
   Eye,
   CircleDot,
   RefreshCw,
+  Send,
 } from "lucide-react";
+import { sendToGemini, type DataPanen } from "@/lib/gemini";
 import {
   AreaChart,
   Area,
@@ -50,7 +52,7 @@ import {
 //  MOCK DATA — AI-generated predictions
 // ══════════════════════════════════════════
 
-const lahanAktif = [
+const defaultMockLahan = [
   {
     id: 1,
     komoditas: "Padi",
@@ -334,6 +336,8 @@ function RingProgress({ value, size = 56, strokeWidth = 5, color = "stroke-emera
 
 export function PetaniAI() {
   const navigate = useNavigate();
+  const [lahanAktif, setLahanAktif] = useState<any[]>([]);
+  const [isLoadingLahan, setIsLoadingLahan] = useState(true);
   const [selectedLahan, setSelectedLahan] = useState(0);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     crop: true,
@@ -341,13 +345,93 @@ export function PetaniAI() {
     rekomendasi: true,
     weather: false,
     market: false,
+    chat: true,
   });
+
+  // ── Chat state ─────────────────────────────
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll ke bawah saat pesan baru masuk
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, chatLoading]);
+
+  const sendMessage = async () => {
+    if (!chatInput.trim() || chatLoading) return;
+    const msg = chatInput.trim();
+    setChatInput("");
+    setChatMessages((prev) => [...prev, { role: "user", text: msg }]);
+    setChatLoading(true);
+
+    try {
+      // History untuk multi-turn conversation
+      const history = chatMessages.map((m) => ({
+        role: m.role === "user" ? ("user" as const) : ("model" as const),
+        text: m.text,
+      }));
+
+      // Susun konteks data panen
+      const panenContext: DataPanen[] = (lahanAktif.length > 0 ? lahanAktif : defaultMockLahan).map(
+        (d: any) => ({
+          komoditas: d.komoditas,
+          luas_lahan: d.luas_lahan || parseFloat(d.luas),
+          tanggal_tanam: d.tanggal_tanam || d.tanggalTanam,
+          estimasi_panen: d.estimasi_panen || d.prediksiPanen,
+          volume_estimasi: d.volume_estimasi,
+          lokasi: d.lokasi || d.lokasiDetail,
+          status: d.status || d.fase,
+        })
+      );
+
+      const reply = await sendToGemini(msg, history, panenContext);
+      setChatMessages((prev) => [...prev, { role: "ai", text: reply }]);
+    } catch (err: any) {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "ai", text: `⚠️ ${err.message || "Tidak dapat terhubung ke AI."}` },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      fetch(`http://localhost:5001/api/predictions/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setLahanAktif(data);
+          } else {
+            setLahanAktif(defaultMockLahan);
+          }
+          setIsLoadingLahan(false);
+        })
+        .catch(err => {
+          console.error("Failed to load AI predictions", err);
+          setLahanAktif(defaultMockLahan);
+          setIsLoadingLahan(false);
+        });
+    } else {
+      setLahanAktif(defaultMockLahan);
+      setIsLoadingLahan(false);
+    }
+  }, []);
 
   const toggleSection = (key: string) => {
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const lahan = lahanAktif[selectedLahan];
+
+  if (isLoadingLahan || !lahan) {
+    return <div className="flex items-center justify-center h-screen bg-[#F5FCEF]"><div className="text-emerald-500 font-bold">Memuat AI Asisten...</div></div>;
+  }
+
   const fc = faseColor(lahan.fase);
   const kc = kesehatanColor(lahan.kesehatan);
 
@@ -395,7 +479,7 @@ export function PetaniAI() {
               <Sparkles className="w-4 h-4 text-emerald-400" />
             </motion.div>
             <p className="text-emerald-300 text-xs flex-1">
-              AI menganalisis <strong>3 lahan aktif</strong> Anda. Data diperbarui 5 menit lalu.
+              AI menganalisis <strong>{lahanAktif.length} lahan aktif</strong> Anda. Data diperbarui secara real-time.
             </p>
             <RefreshCw className="w-3.5 h-3.5 text-emerald-500" />
           </motion.div>
@@ -892,6 +976,140 @@ export function PetaniAI() {
                       </div>
                     );
                   })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ════════════════════════════════════════ */}
+        {/*  6. TANYA AI GEMINI — LIVE CHAT        */}
+        {/* ════════════════════════════════════════ */}
+        <div className="px-5 mb-8">
+          <button
+            onClick={() => toggleSection("chat")}
+            className="w-full flex items-center justify-between mb-3"
+          >
+            <div className="flex items-center gap-2">
+              <Brain className="w-4 h-4 text-emerald-400" />
+              <span className="text-black font-bold text-sm">Tanya AI Asisten</span>
+              <span className="text-[9px] px-2 py-0.5 bg-emerald-500/20 text-emerald-600 rounded-full font-bold border border-emerald-500/30">
+                Gemini 2.5
+              </span>
+            </div>
+            {expandedSections.chat ? (
+              <ChevronUp className="w-4 h-4 text-zinc-500" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-zinc-500" />
+            )}
+          </button>
+
+          <AnimatePresence>
+            {expandedSections.chat && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-white border border-emerald-200 rounded-2xl p-4 flex flex-col gap-3">
+
+                  {/* Quick Prompts — hanya tampil saat belum ada pesan */}
+                  {chatMessages.length === 0 && (
+                    <div>
+                      <p className="text-zinc-400 text-[10px] mb-2 font-medium">Pertanyaan cepat:</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          "Kapan waktu panen terbaik?",
+                          "Pupuk apa yang cocok?",
+                          "Cara atasi hama wereng?",
+                          "Analisis harga jual",
+                          "Tips irigasi musim kering",
+                        ].map((q) => (
+                          <button
+                            key={q}
+                            onClick={() => setChatInput(q)}
+                            className="text-[10px] px-2.5 py-1 bg-emerald-50 border border-emerald-200
+                                       text-emerald-700 rounded-full hover:bg-emerald-100 transition-colors"
+                          >
+                            {q}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pesan-pesan */}
+                  {chatMessages.length > 0 && (
+                    <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pr-1" style={{ scrollbarWidth: "thin" }}>
+                      {chatMessages.map((m, i) => (
+                        <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                          {/* Avatar AI */}
+                          {m.role === "ai" && (
+                            <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-emerald-600
+                                            rounded-lg flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
+                              <Brain className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                          <div
+                            className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
+                              m.role === "user"
+                                ? "bg-emerald-500 text-white rounded-br-sm"
+                                : "bg-emerald-50 text-zinc-700 border border-emerald-100 rounded-bl-sm"
+                            }`}
+                          >
+                            {m.text}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Loading dots */}
+                      {chatLoading && (
+                        <div className="flex justify-start items-center gap-2">
+                          <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-emerald-600
+                                          rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Brain className="w-3 h-3 text-white" />
+                          </div>
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3">
+                            <div className="flex gap-1 items-center">
+                              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                              <span className="text-[9px] text-zinc-400 ml-1">Gemini sedang berpikir...</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div ref={chatBottomRef} />
+                    </div>
+                  )}
+
+                  {/* Input + Send */}
+                  <div className="flex gap-2 items-center">
+                    <input
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                      placeholder="Tulis pertanyaan pertanian..."
+                      className="flex-1 h-11 px-3.5 bg-emerald-50 border border-emerald-200 rounded-xl
+                                 text-zinc-900 text-xs placeholder:text-zinc-400
+                                 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/10"
+                    />
+                    <button
+                      id="chat-send-btn"
+                      onClick={sendMessage}
+                      disabled={chatLoading || !chatInput.trim()}
+                      className="h-11 w-11 flex items-center justify-center
+                                 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white
+                                 rounded-xl shadow-lg shadow-emerald-500/25
+                                 disabled:opacity-40 disabled:cursor-not-allowed
+                                 transition-all hover:shadow-emerald-500/40"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}

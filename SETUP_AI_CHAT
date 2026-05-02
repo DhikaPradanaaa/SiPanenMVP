@@ -1,0 +1,469 @@
+# Setup AI Chat dengan Google Gemini di SiPanen
+
+Dokumentasi teknis lengkap cara mengintegrasikan **Google Gemini API** sebagai fitur chat AI pada aplikasi SiPanen (React + Vite + TypeScript).
+
+---
+
+## Daftar Isi
+
+1. [Persiapan API Key](#1-persiapan-api-key)
+2. [Membuat Gemini Client](#2-membuat-gemini-client)
+3. [Integrasi Data Panen ke Konteks AI](#3-integrasi-data-panen-ke-konteks-ai)
+4. [Penyesuaian UI Chat](#4-penyesuaian-ui-chat)
+5. [Troubleshooting Error](#5-troubleshooting-error)
+
+---
+
+## 1. Persiapan API Key
+
+### 1.1 Dapatkan API Key Gemini
+
+1. Buka [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Login dengan akun Google
+3. Klik **"Create API key"**
+4. Copy API key yang dihasilkan (format: `AIzaSy...`)
+
+### 1.2 Tambahkan ke Environment Variables
+
+Buka file `.env` di root proyek, tambahkan baris berikut:
+
+```env
+VITE_GEMINI_API_KEY="AIzaSy...API_KEY_KAMU"
+```
+
+> **Penting:** Prefix `VITE_` wajib ada agar Vite mengekspos variabel ini ke browser. Tanpa prefix ini, nilai akan `undefined` saat runtime.
+
+Setelah mengubah `.env`, **restart dev server** agar Vite membaca ulang variabel:
+
+```bash
+# Stop server (Ctrl+C), lalu:
+npm run dev
+```
+
+---
+
+## 2. Membuat Gemini Client
+
+Buat file baru: `src/lib/gemini.ts`
+
+### 2.1 Struktur File
+
+```
+src/
+└── lib/
+    └── gemini.ts   ← file baru yang kita buat
+```
+
+### 2.2 Daftar Model dengan Fallback
+
+Masalah utama Gemini API: **model tertentu bisa kena rate limit (429) atau tidak tersedia** tergantung region dan tipe akun. Solusinya adalah menyiapkan **daftar model fallback** yang dicoba secara berurutan:
+
+```typescript
+const GEMINI_MODELS = [
+  "gemini-2.5-flash",      // Prioritas utama — paling baru & stabil
+  "gemini-2.0-flash-lite", // Fallback — kuota gratis lebih besar
+  "gemini-2.0-flash",      // Fallback terakhir
+];
+
+const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+```
+
+> **Kenapa perlu fallback?**
+> Model `gemini-2.5-flash-preview-04-17` (versi preview lama) sudah tidak tersedia.
+> Model `gemini-2.0-flash` kadang kena rate limit 429 pada free tier.
+> Dengan fallback, sistem otomatis pindah ke model berikutnya tanpa error ke user.
+
+### 2.3 System Prompt Berbasis Data Panen
+
+AI menjadi lebih berguna ketika tahu konteks spesifik user. Kita build system prompt yang menyertakan **data lahan aktif petani**:
+
+```typescript
+export interface DataPanen {
+  komoditas: string;        // Padi, Jagung, Cabai, dll
+  luas_lahan?: number;      // dalam satuan Ha
+  tanggal_tanam?: string;
+  estimasi_panen?: string;
+  volume_estimasi?: number; // dalam kg (dibagi 1000 untuk Ton)
+  lokasi?: string;
+  status?: string;
+}
+
+export function buildSystemPrompt(dataPanen: DataPanen[]): string {
+  const today = new Date().toLocaleDateString("id-ID", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+
+  let lahanContext = "";
+  if (dataPanen.length > 0) {
+    lahanContext = "\n\nDATA LAHAN AKTIF PETANI INI:\n" + dataPanen.map((d, i) =>
+      `${i + 1}. ${d.komoditas}` +
+      (d.luas_lahan    ? ` | Luas: ${d.luas_lahan} Ha`                           : "") +
+      (d.tanggal_tanam ? ` | Tanam: ${d.tanggal_tanam}`                           : "") +
+      (d.estimasi_panen ? ` | Est. Panen: ${d.estimasi_panen}`                    : "") +
+      (d.volume_estimasi ? ` | Est. Volume: ${(d.volume_estimasi/1000).toFixed(1)} Ton` : "") +
+      (d.lokasi  ? ` | Lokasi: ${d.lokasi}`                                       : "") +
+      (d.status  ? ` | Status: ${d.status}`                                       : "")
+    ).join("\n");
+  } else {
+    lahanContext = "\n\nPetani belum memiliki data lahan yang tercatat.";
+  }
+
+  return `Kamu adalah AI Asisten Tani SiPanen yang cerdas dan berpengalaman.
+
+Hari ini: ${today}
+${lahanContext}
+
+PANDUAN RESPONS:
+- Gunakan bahasa Indonesia yang ramah dan mudah dipahami petani
+- Jika ditanya tentang data lahan di atas, berikan analisis spesifik
+- Berikan rekomendasi praktis yang bisa langsung diterapkan
+- Topik: prediksi panen, pupuk, hama/penyakit, cuaca, irigasi, harga pasar
+- Format: singkat tapi informatif, gunakan poin-poin jika perlu`;
+}
+```
+
+### 2.4 Fungsi Kirim Pesan dengan Multi-Turn & Fallback
+
+```typescript
+export async function sendToGemini(
+  message: string,
+  history: { role: "user" | "model"; text: string }[],
+  dataPanen: DataPanen[]
+): Promise<string> {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+  // Validasi API key
+  if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY_HERE") {
+    return "API Key Gemini belum dikonfigurasi.";
+  }
+
+  const systemPrompt = buildSystemPrompt(dataPanen);
+
+  // Susun conversation history (format Gemini: role + parts)
+  // Catatan: Gemini tidak punya "system" role — kita simulasikan
+  // dengan turn pertama user→model yang berisi system prompt.
+  const contents = [
+    { role: "user",  parts: [{ text: "Kamu adalah siapa?" }] },
+    { role: "model", parts: [{ text: systemPrompt + "\n\nSaya siap membantu!" }] },
+    // History percakapan sebelumnya (mendukung multi-turn)
+    ...history.map(h => ({
+      role: h.role === "user" ? "user" : "model",
+      parts: [{ text: h.text }],
+    })),
+    // Pesan terbaru dari user
+    { role: "user", parts: [{ text: message }] },
+  ];
+
+  const requestBody = {
+    contents,
+    generationConfig: {
+      temperature: 0.7,      // Kreativitas (0=deterministik, 1=kreatif)
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 1024, // Panjang maksimal respons (~750 kata)
+    },
+    safetySettings: [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+    ],
+  };
+
+  // Loop fallback: coba setiap model sampai ada yang berhasil
+  let lastError = "";
+  for (const model of GEMINI_MODELS) {
+    const url = `${GEMINI_BASE_URL}/${model}:generateContent?key=${apiKey}`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.status === 429) {
+        lastError = `Rate limit pada ${model}`;
+        continue; // coba model berikutnya
+      }
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        lastError = (err as any)?.error?.message || `HTTP ${response.status}`;
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) { lastError = "Respons kosong"; continue; }
+
+      return text; // Sukses!
+    } catch (err: any) {
+      lastError = err.message || "Network error";
+      continue;
+    }
+  }
+
+  throw new Error(lastError || "Semua model Gemini tidak tersedia.");
+}
+```
+
+---
+
+## 3. Integrasi Data Panen ke Konteks AI
+
+### 3.1 Ambil Data Real dari Hook
+
+Di `src/pages/PetaniAI.tsx`, import hook data panen dan Gemini client:
+
+```typescript
+import { useDataTanam } from "@/hooks/useSupabaseData";
+import { sendToGemini } from "@/lib/gemini";
+```
+
+Di dalam komponen:
+
+```typescript
+// Ambil data panen real dari database/localStorage
+const { data: dataTanam } = useDataTanam();
+
+// Jika ada data real, gunakan itu. Jika tidak, fallback ke mock data.
+const lahanDisplay = dataTanam.length > 0
+  ? dataTanam.map((d: any) => ({
+      id: d.id,
+      komoditas: d.komoditas,
+      luas: `${d.luas_lahan || 0} Ha`,
+      lokasiDetail: d.lokasi || "Indonesia",
+      prediksiPanen: d.estimasi_panen
+        ? new Date(d.estimasi_panen).toLocaleDateString("id-ID")
+        : "-",
+      estimasiHasil: d.volume_estimasi
+        ? `${(d.volume_estimasi / 1000).toFixed(1)} Ton`
+        : "-",
+      // ... field lainnya sesuai kebutuhan UI
+    }))
+  : lahanAktif; // mock data sebagai fallback
+```
+
+### 3.2 Kirim Pesan dengan Konteks Panen
+
+```typescript
+const sendMessage = async () => {
+  if (!chatInput.trim() || chatLoading) return;
+  const msg = chatInput.trim();
+  setChatInput("");
+  setChatMessages(prev => [...prev, { role: "user", text: msg }]);
+  setChatLoading(true);
+
+  try {
+    // Siapkan history untuk multi-turn conversation
+    const history = chatMessages.map(m => ({
+      role: m.role === "user" ? "user" as const : "model" as const,
+      text: m.text,
+    }));
+
+    // Susun konteks data panen (real atau mock)
+    const panenContext = (dataTanam.length > 0 ? dataTanam : lahanAktif)
+      .map((d: any) => ({
+        komoditas: d.komoditas,
+        luas_lahan: d.luas_lahan || parseFloat(d.luas),
+        tanggal_tanam: d.tanggal_tanam || d.tanggalTanam,
+        estimasi_panen: d.estimasi_panen || d.prediksiPanen,
+        volume_estimasi: d.volume_estimasi,
+        lokasi: d.lokasi || d.lokasiDetail,
+        status: d.status || d.fase,
+      }));
+
+    const reply = await sendToGemini(msg, history, panenContext);
+    setChatMessages(prev => [...prev, { role: "ai", text: reply }]);
+  } catch (err: any) {
+    setChatMessages(prev => [...prev, {
+      role: "ai",
+      text: `⚠️ ${err.message || "Tidak dapat terhubung ke AI."}`,
+    }]);
+  } finally {
+    setChatLoading(false);
+  }
+};
+```
+
+---
+
+## 4. Penyesuaian UI Chat
+
+### 4.1 Badge Versi Model di Header Seksi
+
+```tsx
+<div className="flex items-center gap-2">
+  <Brain className="w-4 h-4 text-emerald-400" />
+  <span className="text-black font-bold text-sm">Tanya AI Asisten</span>
+  <span className="text-[9px] px-2 py-0.5 bg-emerald-500/20 text-emerald-600
+                   rounded-full font-bold border border-emerald-500/30">
+    Gemini 2.5
+  </span>
+</div>
+```
+
+### 4.2 Quick Prompt Chips
+
+Tampilkan chip pertanyaan cepat saat chat masih kosong. Saat diklik, teks chip masuk ke input field (user masih bisa edit sebelum kirim):
+
+```tsx
+{chatMessages.length === 0 && (
+  <div className="mb-3">
+    <p className="text-zinc-400 text-[10px] mb-2 font-medium">Pertanyaan cepat:</p>
+    <div className="flex flex-wrap gap-1.5">
+      {[
+        "Kapan waktu panen terbaik?",
+        "Pupuk apa yang cocok?",
+        "Cara atasi hama wereng?",
+        "Analisis harga jual",
+        "Tips irigasi musim kering",
+      ].map((q) => (
+        <button
+          key={q}
+          onClick={() => setChatInput(q)}
+          className="text-[10px] px-2.5 py-1 bg-emerald-50 border border-emerald-200
+                     text-emerald-700 rounded-full hover:bg-emerald-100 transition-colors"
+        >
+          {q}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+```
+
+### 4.3 Bubble Chat dengan Avatar AI
+
+```tsx
+{chatMessages.map((m, i) => (
+  <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+
+    {/* Avatar hanya untuk pesan AI */}
+    {m.role === "ai" && (
+      <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-emerald-600
+                      rounded-lg flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
+        <Brain className="w-3 h-3 text-white" />
+      </div>
+    )}
+
+    <div className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed
+                     whitespace-pre-wrap
+                     ${m.role === "user"
+                       ? "bg-emerald-500 text-white rounded-br-sm"
+                       : "bg-emerald-50 text-zinc-700 border border-emerald-100 rounded-bl-sm"
+                     }`}>
+      {m.text}
+    </div>
+  </div>
+))}
+```
+
+> **Catatan `whitespace-pre-wrap`:** Gemini sering mengembalikan teks dengan `\n` untuk baris baru. Tanpa property ini, semua teks akan menjadi satu paragraf panjang.
+
+### 4.4 Loading Indicator
+
+```tsx
+{chatLoading && (
+  <div className="flex justify-start items-center gap-2">
+    <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-emerald-600
+                    rounded-lg flex items-center justify-center flex-shrink-0">
+      <Brain className="w-3 h-3 text-white" />
+    </div>
+    <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3">
+      <div className="flex gap-1 items-center">
+        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"
+             style={{ animationDelay: "0ms" }} />
+        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"
+             style={{ animationDelay: "150ms" }} />
+        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"
+             style={{ animationDelay: "300ms" }} />
+        <span className="text-[9px] text-zinc-400 ml-1">Gemini sedang berpikir...</span>
+      </div>
+    </div>
+  </div>
+)}
+```
+
+### 4.5 Input Field + Tombol Send
+
+```tsx
+<div className="flex gap-2 items-center">
+  <input
+    value={chatInput}
+    onChange={(e) => setChatInput(e.target.value)}
+    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+    placeholder="Tulis pertanyaan pertanian..."
+    className="flex-1 h-11 px-3.5 bg-emerald-50 border border-emerald-200 rounded-xl
+               text-zinc-900 text-xs placeholder:text-zinc-400
+               focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/10"
+  />
+  <button
+    onClick={sendMessage}
+    disabled={chatLoading || !chatInput.trim()}
+    className="h-11 w-11 flex items-center justify-center
+               bg-gradient-to-br from-emerald-500 to-emerald-600 text-white
+               rounded-xl shadow-lg shadow-emerald-500/25
+               disabled:opacity-40 disabled:cursor-not-allowed
+               transition-all hover:shadow-emerald-500/40"
+  >
+    <Send className="w-4 h-4" />
+  </button>
+</div>
+```
+
+---
+
+## 5. Troubleshooting Error
+
+### Error yang Ditemui & Solusinya
+
+| Error | Penyebab | Solusi |
+|-------|----------|--------|
+| `⚠️ API Key belum dikonfigurasi` | `VITE_GEMINI_API_KEY` kosong atau masih placeholder | Isi key di `.env`, restart server |
+| `models/gemini-X is not found` | Nama model salah / versi preview dihapus | Pakai model stabil: `gemini-2.5-flash` |
+| `HTTP 429 (Rate Limit)` | Kuota per menit habis di free tier | Sistem fallback otomatis ke model lain |
+| `Failed to fetch` | Browser blokir request / koneksi gagal | Pastikan API key valid, cek koneksi internet |
+| Respons tidak muncul setelah edit `.env` | Vite cache lama, belum baca key baru | Stop dev server → `npm run dev` ulang |
+
+### Cek Model yang Tersedia untuk API Key Kamu
+
+Buka URL ini di browser (ganti dengan API key kamu):
+
+```
+https://generativelanguage.googleapis.com/v1beta/models?key=API_KEY_KAMU
+```
+
+Lihat nilai `"name"` di JSON respons. Hanya gunakan nama model yang tercantum di sana untuk `generateContent`.
+
+---
+
+## Ringkasan Arsitektur
+
+```
+.env
+└── VITE_GEMINI_API_KEY
+
+src/lib/gemini.ts
+├── DataPanen interface
+├── buildSystemPrompt(dataPanen)
+│   └── Buat system prompt + inject konteks lahan user
+└── sendToGemini(msg, history, dataPanen)
+    ├── Validasi API key
+    ├── Susun contents (system + history + pesan baru)
+    └── Loop fallback model:
+        gemini-2.5-flash → gemini-2.0-flash-lite → gemini-2.0-flash
+
+src/hooks/useSupabaseData.ts
+└── useDataTanam() → Ambil data lahan real dari DB/localStorage
+
+src/pages/PetaniAI.tsx
+├── lahanDisplay  → Data real (atau mock jika belum ada)
+├── sendMessage() → Panggil sendToGemini() dengan konteks panen
+└── Chat UI
+    ├── Quick prompt chips
+    ├── Bubble chat (user & AI dengan avatar)
+    ├── Loading "Gemini sedang berpikir..."
+    └── Input + tombol Send (icon)
+```
+
+---
+
+*Dokumentasi ini dibuat untuk proyek SiPanen — 3 Mei 2026*

@@ -20,10 +20,41 @@ export function Register() {
   const [step, setStep] = useState<"role" | "form">("role");
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [formData, setFormData] = useState({ nama: "", email: "", password: "", lokasi: "", jenisUsaha: "" });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedRole) navigate(roleConfig[selectedRole].dashboard);
+    if (!selectedRole) return;
+
+    // Jika semua field kosong, langsung navigasi ke dashboard
+    const isEmpty = !formData.nama && !formData.email && !formData.password && !formData.lokasi && !formData.jenisUsaha;
+    if (isEmpty) {
+      navigate(roleConfig[selectedRole].dashboard);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch("http://localhost:5001/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, role: selectedRole })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("userId", data.id);
+        navigate(roleConfig[selectedRole].dashboard);
+      } else {
+        alert(data.error || "Gagal registrasi");
+      }
+    } catch (err) {
+      // Jika server tidak tersedia, tetap navigasi ke dashboard
+      navigate(roleConfig[selectedRole].dashboard);
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -72,39 +103,39 @@ export function Register() {
                   <Label htmlFor="nama" className="text-zinc-700">Nama Lengkap</Label>
                   <div className="relative">
                     <User className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
-                    <Input id="nama" placeholder="Masukkan nama lengkap" value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" required />
+                    <Input id="nama" placeholder="Masukkan nama lengkap" value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-zinc-700">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
-                    <Input id="email" type="email" placeholder="nama@email.com" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" required />
+                    <Input id="email" type="email" placeholder="nama@email.com" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-zinc-700">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
-                    <Input id="password" type="password" placeholder="Minimal 8 karakter" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" required />
+                    <Input id="password" type="password" placeholder="Minimal 8 karakter" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lokasi" className="text-zinc-700">Lokasi</Label>
                   <div className="relative">
                     <MapPin className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
-                    <Input id="lokasi" placeholder="Kota/Kabupaten" value={formData.lokasi} onChange={(e) => setFormData({ ...formData, lokasi: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" required />
+                    <Input id="lokasi" placeholder="Kota/Kabupaten" value={formData.lokasi} onChange={(e) => setFormData({ ...formData, lokasi: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="usaha" className="text-zinc-700">{selectedRole === "petani" ? "Komoditas Utama" : "Nama Usaha"}</Label>
                   <div className="relative">
                     <Briefcase className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
-                    <Input id="usaha" placeholder={selectedRole ? roleConfig[selectedRole].placeholder : ""} value={formData.jenisUsaha} onChange={(e) => setFormData({ ...formData, jenisUsaha: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" required />
+                    <Input id="usaha" placeholder={selectedRole ? roleConfig[selectedRole].placeholder : ""} value={formData.jenisUsaha} onChange={(e) => setFormData({ ...formData, jenisUsaha: e.target.value })} className="pl-12 h-14 bg-white border-emerald-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl" />
                   </div>
                 </div>
-                <Button type="submit" className="w-full h-14 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all duration-200 mt-4">
-                  Daftar Sekarang
+                <Button type="submit" disabled={isLoading} className="w-full h-14 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all duration-200 mt-4">
+                  {isLoading ? "Mendaftar..." : "Daftar Sekarang"}
                 </Button>
               </form>
             </motion.div>

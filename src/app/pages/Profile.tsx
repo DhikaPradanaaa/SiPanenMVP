@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import {
   ArrowLeft, User, Mail, MapPin, Phone, Briefcase, Shield, Crown,
@@ -138,10 +138,66 @@ const roleColors: Record<UserRole, { gradient: string; badge: string; light: str
 export function Profile() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const role = (searchParams.get("role") || "petani") as UserRole;
-  const profile = profileDataMap[role];
-  const colors = roleColors[role];
-  const RoleIcon = roleIcons[role];
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      fetch(`http://localhost:5001/api/user/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) setUserData(data);
+        })
+        .catch(err => console.error("Error fetching user", err));
+    }
+  }, []);
+
+  const role = userData?.role || (searchParams.get("role") || "petani") as UserRole;
+  
+  const baseProfile = profileDataMap[role as UserRole] || profileDataMap["petani"];
+  const profile = userData ? {
+    ...baseProfile,
+    nama: userData.nama,
+    email: userData.email,
+    lokasi: userData.lokasi,
+    foto: userData.foto || baseProfile.foto,
+    role: userData.role,
+    roleLabel: userData.role === "petani" ? "Petani" : userData.role === "distributor" ? "Distributor" : "Perusahaan",
+  } : baseProfile;
+
+  const colors = roleColors[role as UserRole] || roleColors["petani"];
+  const RoleIcon = roleIcons[role as UserRole] || roleIcons["petani"];
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    try {
+      const res = await fetch("http://localhost:5001/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.url && userData) {
+        const userId = localStorage.getItem("userId");
+        if(userId) {
+            await fetch(`http://localhost:5001/api/user/${userId}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({...userData, foto: data.url})
+            });
+            setUserData({...userData, foto: data.url});
+        }
+      }
+    } catch(err) {
+      console.error("Upload failed", err);
+    }
+  };
 
   const [notifEnabled, setNotifEnabled] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -152,6 +208,16 @@ export function Profile() {
     lokasi: profile.lokasi,
     bio: profile.bio,
   });
+
+  useEffect(() => {
+    setEditForm({
+      nama: profile.nama,
+      email: profile.email,
+      phone: profile.phone,
+      lokasi: profile.lokasi,
+      bio: profile.bio,
+    });
+  }, [profile.nama, profile.email]);
 
   const dashboardPath = `/dashboard/${role}`;
 
@@ -222,9 +288,10 @@ export function Profile() {
                   alt={profile.nama}
                   className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-lg"
                 />
-                <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-white border border-emerald-200 rounded-xl flex items-center justify-center shadow-sm hover:bg-emerald-50 transition-colors">
+                <button onClick={() => fileInputRef.current?.click()} className="absolute -bottom-1 -right-1 w-8 h-8 bg-white border border-emerald-200 rounded-xl flex items-center justify-center shadow-sm hover:bg-emerald-50 transition-colors">
                   <Camera className="w-3.5 h-3.5 text-emerald-500" />
                 </button>
+                <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handlePhotoUpload} />
                 {profile.verified && (
                   <div className="absolute -top-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white">
                     <CheckCircle2 className="w-3.5 h-3.5 text-white" />

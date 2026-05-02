@@ -2,45 +2,29 @@ import { MobileLayout } from "../components/MobileLayout";
 import { Card } from "../components/ui/card";
 import { Calendar, TrendingUp, Package, AlertCircle, CheckCircle2, Leaf, Sparkles } from "lucide-react";
 
+import { useState, useEffect } from "react";
+
 export function PrediksiPanen() {
-  const predictions = [
-    {
-      id: 1,
-      komoditas: "Padi",
-      lokasi: "Subang, Jawa Barat",
-      tanggalTanam: "15 Feb 2026",
-      prediksiPanen: "15 Mei 2026",
-      hariTersisa: 65,
-      estimasiVolume: "24 Ton",
-      akurasi: 94,
-      status: "on-track",
-      progress: 75,
-    },
-    {
-      id: 2,
-      komoditas: "Jagung",
-      lokasi: "Kediri, Jawa Timur",
-      tanggalTanam: "10 Jan 2026",
-      prediksiPanen: "18 Maret 2026",
-      hariTersisa: 7,
-      estimasiVolume: "18 Ton",
-      akurasi: 96,
-      status: "ready",
-      progress: 95,
-    },
-    {
-      id: 3,
-      komoditas: "Cabai",
-      lokasi: "Garut, Jawa Barat",
-      tanggalTanam: "20 Feb 2026",
-      prediksiPanen: "20 April 2026",
-      hariTersisa: 40,
-      estimasiVolume: "8 Ton",
-      akurasi: 91,
-      status: "on-track",
-      progress: 60,
-    },
-  ];
+  const [predictions, setPredictions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      fetch(`http://localhost:5001/api/predictions/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          setPredictions(Array.isArray(data) ? data : []);
+          setIsLoading(false);
+        })
+        .catch(err => {
+          console.error("Failed to load predictions", err);
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
 
   return (
     <MobileLayout title="Prediksi Panen" showBackButton>
@@ -62,7 +46,11 @@ export function PrediksiPanen() {
 
         {/* Predictions List */}
         <div className="space-y-4">
-          {predictions.map((pred) => (
+          {isLoading ? (
+            <div className="text-center py-10 text-zinc-500">Memuat data dari AI...</div>
+          ) : predictions.length === 0 ? (
+            <div className="text-center py-10 text-zinc-500">Belum ada data tanam. Silakan input data tanam terlebih dahulu.</div>
+          ) : predictions.map((pred) => (
             <Card key={pred.id} className="bg-white border-emerald-200 p-6 hover:border-emerald-400 transition-all duration-200">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
