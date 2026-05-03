@@ -495,11 +495,10 @@ export function PetaniAI() {
                 <button
                   key={l.id}
                   onClick={() => setSelectedLahan(i)}
-                  className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 ${
-                    active
-                      ? "bg-white border-emerald-400 shadow-lg shadow-emerald-500/10"
-                      : "bg-white/50 border-emerald-200 hover:border-emerald-300"
-                  }`}
+                  className={`flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 ${active
+                    ? "bg-white border-emerald-400 shadow-lg shadow-emerald-500/10"
+                    : "bg-white/50 border-emerald-200 hover:border-emerald-300"
+                    }`}
                 >
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${active ? "bg-gradient-to-br from-emerald-500 to-emerald-600" : "bg-emerald-100"}`}>
                     <Leaf className={`w-4.5 h-4.5 ${active ? "text-white" : "text-emerald-500"}`} />
@@ -672,11 +671,10 @@ export function PetaniAI() {
                   </div>
 
                   {/* Risiko Gagal Panen */}
-                  <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${
-                    lahan.risikoGagal > 15
-                      ? "bg-amber-500/8 border-amber-500/20"
-                      : "bg-emerald-500/8 border-emerald-500/20"
-                  }`}>
+                  <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${lahan.risikoGagal > 15
+                    ? "bg-amber-500/8 border-amber-500/20"
+                    : "bg-emerald-500/8 border-emerald-500/20"
+                    }`}>
                     <ShieldAlert className={`w-5 h-5 flex-shrink-0 ${lahan.risikoGagal > 15 ? "text-amber-400" : "text-emerald-400"}`} />
                     <div>
                       <div className="text-[10px] text-zinc-400">Risiko Gagal Panen</div>
@@ -808,9 +806,8 @@ export function PetaniAI() {
                       return (
                         <div
                           key={i}
-                          className={`flex-1 rounded-xl p-2.5 text-center border ${
-                            i === 0 ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200"
-                          }`}
+                          className={`flex-1 rounded-xl p-2.5 text-center border ${i === 0 ? "bg-emerald-500/10 border-emerald-500/20" : "bg-emerald-50 border-emerald-200"
+                            }`}
                         >
                           <div className="text-[9px] text-zinc-500 mb-1.5">{h.nama}</div>
                           <WIcon className={`w-5 h-5 mx-auto mb-1 ${i === 0 ? "text-emerald-400" : "text-zinc-400"}`} />
@@ -913,9 +910,8 @@ export function PetaniAI() {
                         {/* Header */}
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="text-zinc-900 font-bold text-sm">{m.komoditas}</h4>
-                          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                            isUp ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"
-                          }`}>
+                          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${isUp ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"
+                            }`}>
                             {isUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {m.persentase}
                           </div>
@@ -994,7 +990,7 @@ export function PetaniAI() {
               <Brain className="w-4 h-4 text-emerald-400" />
               <span className="text-black font-bold text-sm">Tanya AI Asisten</span>
               <span className="text-[9px] px-2 py-0.5 bg-emerald-500/20 text-emerald-600 rounded-full font-bold border border-emerald-500/30">
-                Gemini 2.5
+                AI SiPanen
               </span>
             </div>
             {expandedSections.chat ? (
@@ -1042,9 +1038,9 @@ export function PetaniAI() {
 
                   {/* Pesan-pesan */}
                   {chatMessages.length > 0 && (
-                    <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pr-1" style={{ scrollbarWidth: "thin" }}>
+                    <div className="flex flex-col gap-3">
                       {chatMessages.map((m, i) => (
-                        <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                        <div key={i} className={`flex shrink-0 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                           {/* Avatar AI */}
                           {m.role === "ai" && (
                             <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-emerald-600
@@ -1053,11 +1049,10 @@ export function PetaniAI() {
                             </div>
                           )}
                           <div
-                            className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
-                              m.role === "user"
-                                ? "bg-emerald-500 text-white rounded-br-sm"
-                                : "bg-emerald-50 text-zinc-700 border border-emerald-100 rounded-bl-sm"
-                            }`}
+                            className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${m.role === "user"
+                              ? "bg-emerald-500 text-white rounded-br-sm"
+                              : "bg-emerald-50 text-zinc-700 border border-emerald-100 rounded-bl-sm"
+                              }`}
                           >
                             {m.text}
                           </div>
@@ -1076,7 +1071,7 @@ export function PetaniAI() {
                               <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                               <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                               <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                              <span className="text-[9px] text-zinc-400 ml-1">Gemini sedang berpikir...</span>
+                              <span className="text-[9px] text-zinc-400 ml-1">AI SiPanen sedang berpikir...</span>
                             </div>
                           </div>
                         </div>
