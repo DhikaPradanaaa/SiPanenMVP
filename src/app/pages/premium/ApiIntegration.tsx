@@ -29,61 +29,25 @@ import {
 
 const apiPlans = [
   {
-    id: "starter",
-    name: "Starter",
-    price: "Rp 2.5Jt",
-    period: "/bulan",
-    desc: "Untuk startup & integrasi sederhana",
-    rateLimit: "1,000 req/hari",
+    id: "perusahaan",
+    name: "Enterprise API",
+    price: "Rp 20.000.000",
+    period: "/perusahaan",
+    desc: "Akses integrasi data penuh untuk perusahaan",
+    rateLimit: "Unlimited",
     features: [
       "Prediksi panen per komoditas",
       "Data harga pasar real-time",
-      "Webhook notifikasi dasar",
-      "1 API Key",
-      "Email support",
-    ],
-    color: "from-zinc-600 to-zinc-500",
-    popular: false,
-  },
-  {
-    id: "business",
-    name: "Business",
-    price: "Rp 7.5Jt",
-    period: "/bulan",
-    desc: "Untuk perusahaan logistik & perbankan",
-    rateLimit: "10,000 req/hari",
-    features: [
-      "Semua fitur Starter",
+      "Webhook notifikasi real-time",
       "Prediksi produksi per wilayah",
       "Data cuaca & anomali",
-      "Analisis rantai pasok",
-      "5 API Keys",
-      "Priority support 24/7",
-      "SLA 99.5% uptime",
-    ],
-    color: "from-emerald-600 to-emerald-500",
-    popular: true,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "Custom",
-    period: "",
-    desc: "Untuk korporasi & lembaga pemerintah",
-    rateLimit: "Unlimited",
-    features: [
-      "Semua fitur Business",
-      "Custom endpoints",
-      "Batch data processing",
-      "White-label solutions",
       "Unlimited API Keys",
-      "Dedicated infra",
       "SLA 99.9% uptime",
-      "Dedicated account manager",
+      "Priority support 24/7",
     ],
-    color: "from-amber-600 to-amber-500",
-    popular: false,
-  },
+    color: "from-cyan-600 to-cyan-500",
+    popular: true,
+  }
 ];
 
 const endpoints = [
@@ -158,7 +122,7 @@ export function ApiIntegration() {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text).catch(() => {});
+    navigator.clipboard.writeText(text).catch(() => { });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -191,9 +155,8 @@ export function ApiIntegration() {
             <button
               key={t.key}
               onClick={() => setActiveTab(t.key)}
-              className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === t.key ? "bg-cyan-500 text-white" : "text-zinc-400 hover:text-zinc-600"
-              }`}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all ${activeTab === t.key ? "bg-cyan-500 text-white" : "text-zinc-400 hover:text-zinc-600"
+                }`}
             >
               {t.label}
             </button>
@@ -396,7 +359,7 @@ export function ApiIntegration() {
                     Kirim API key Anda di header <span className="text-cyan-600 font-mono">Authorization</span>:
                   </p>
                   <pre className="bg-emerald-50 rounded-xl p-3 text-[9px] font-mono text-zinc-600 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-{`curl -H "Authorization: Bearer sk_live_SiPn_***"
+                    {`curl -H "Authorization: Bearer sk_live_SiPn_***"
      https://api.sipanen.id/v1/predictions/padi`}
                   </pre>
                 </div>
@@ -426,9 +389,8 @@ export function ApiIntegration() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * i }}
-                    className={`relative bg-white border rounded-2xl p-5 ${
-                      plan.popular ? "border-cyan-400 shadow-lg shadow-cyan-500/10" : "border-emerald-200"
-                    }`}
+                    className={`relative bg-white border rounded-2xl p-5 ${plan.popular ? "border-cyan-400 shadow-lg shadow-cyan-500/10" : "border-emerald-200"
+                      }`}
                   >
                     {plan.popular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-cyan-600 to-cyan-500 rounded-full">
@@ -465,11 +427,10 @@ export function ApiIntegration() {
                     </div>
 
                     <button
-                      className={`w-full h-11 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                        plan.popular
+                      className={`w-full h-11 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${plan.popular
                           ? "bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/20"
                           : "bg-emerald-50 border border-emerald-200 text-zinc-600 hover:border-emerald-300"
-                      }`}
+                        }`}
                     >
                       <Zap className="w-4 h-4" />
                       {plan.id === "enterprise" ? "Hubungi Sales" : "Aktivasi Sekarang"}

@@ -26,7 +26,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, AreaChart, A
 
 const summaryStats = [
   { label: "Total Transaksi", value: "Rp 2.84M", sub: "Bulan ini", icon: DollarSign, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-  { label: "Komisi Platform", value: "Rp 71.2Jt", sub: "2.5% rata-rata", icon: Percent, color: "text-amber-400", bg: "bg-amber-500/10" },
+  { label: "Komisi Platform", value: "Rp 1.73Jt", sub: "Rp 5.000 tetap", icon: Percent, color: "text-amber-400", bg: "bg-amber-500/10" },
   { label: "Jumlah Transaksi", value: "347", sub: "+23% vs bulan lalu", icon: ShoppingCart, color: "text-blue-400", bg: "bg-blue-500/10" },
   { label: "Petani Aktif", value: "1,284", sub: "Terhubung marketplace", icon: Users, color: "text-violet-400", bg: "bg-violet-500/10" },
 ];
@@ -42,11 +42,11 @@ const transaksiHarian = [
 ];
 
 const riwayatTransaksi = [
-  { id: "TRX-20260326-001", petani: "Pak Suharto", pembeli: "PT Agro Nusantara", komoditas: "Padi", volume: "8.5 Ton", nilai: "Rp 52.7Jt", komisi: "Rp 1.32Jt", rate: "2.5%", status: "Selesai", tanggal: "26 Mar 2026" },
-  { id: "TRX-20260325-004", petani: "Bu Siti Aminah", pembeli: "CV Makmur Jaya", komoditas: "Padi", volume: "12 Ton", nilai: "Rp 72.6Jt", komisi: "Rp 1.82Jt", rate: "2.5%", status: "Selesai", tanggal: "25 Mar 2026" },
-  { id: "TRX-20260325-002", petani: "Pak Joko", pembeli: "PT FoodTech Indo", komoditas: "Jagung", volume: "5 Ton", nilai: "Rp 24.0Jt", komisi: "Rp 600K", rate: "2.5%", status: "Diproses", tanggal: "25 Mar 2026" },
-  { id: "TRX-20260324-007", petani: "Pak Agus", pembeli: "PT Segar Makmur", komoditas: "Cabai", volume: "2.5 Ton", nilai: "Rp 112.5Jt", komisi: "Rp 2.81Jt", rate: "2.5%", status: "Selesai", tanggal: "24 Mar 2026" },
-  { id: "TRX-20260324-003", petani: "Bu Wati", pembeli: "CV Tani Bersama", komoditas: "Kedelai", volume: "3 Ton", nilai: "Rp 37.5Jt", komisi: "Rp 938K", rate: "2.5%", status: "Selesai", tanggal: "24 Mar 2026" },
+  { id: "TRX-20260326-001", petani: "Pak Suharto", pembeli: "PT Agro Nusantara", komoditas: "Padi", volume: "8.5 Ton", nilai: "Rp 52.7Jt", komisi: "Rp 5.000", rate: "Flat", status: "Selesai", tanggal: "26 Mar 2026" },
+  { id: "TRX-20260325-004", petani: "Bu Siti Aminah", pembeli: "CV Makmur Jaya", komoditas: "Padi", volume: "12 Ton", nilai: "Rp 72.6Jt", komisi: "Rp 5.000", rate: "Flat", status: "Selesai", tanggal: "25 Mar 2026" },
+  { id: "TRX-20260325-002", petani: "Pak Joko", pembeli: "PT FoodTech Indo", komoditas: "Jagung", volume: "5 Ton", nilai: "Rp 24.0Jt", komisi: "Rp 5.000", rate: "Flat", status: "Diproses", tanggal: "25 Mar 2026" },
+  { id: "TRX-20260324-007", petani: "Pak Agus", pembeli: "PT Segar Makmur", komoditas: "Cabai", volume: "2.5 Ton", nilai: "Rp 112.5Jt", komisi: "Rp 5.000", rate: "Flat", status: "Selesai", tanggal: "24 Mar 2026" },
+  { id: "TRX-20260324-003", petani: "Bu Wati", pembeli: "CV Tani Bersama", komoditas: "Kedelai", volume: "3 Ton", nilai: "Rp 37.5Jt", komisi: "Rp 5.000", rate: "Flat", status: "Selesai", tanggal: "24 Mar 2026" },
 ];
 
 const komisiPerKomoditas = [
@@ -169,7 +169,7 @@ export function KomisiMarketplace() {
               <div>
                 <h4 className="text-blue-700 font-bold text-xs mb-1">Transparansi Komisi Platform</h4>
                 <p className="text-zinc-500 text-[11px] leading-relaxed">
-                  SiPanen menerapkan komisi tetap <strong className="text-blue-700">2.5%</strong> dari setiap transaksi berhasil. Komisi otomatis dipotong saat pembayaran dan ditampilkan secara transparan di laporan ini.
+                  SiPanen menerapkan komisi tetap <strong className="text-blue-700">Rp 5.000</strong> dari setiap transaksi berhasil. Komisi otomatis dipotong saat pembayaran dan ditampilkan secara transparan di laporan ini.
                 </p>
               </div>
             </div>

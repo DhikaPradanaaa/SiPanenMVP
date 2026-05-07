@@ -64,28 +64,11 @@ const distribusiKomoditas = [
 
 const plans = [
   {
-    id: "basic",
-    name: "Basic",
-    price: "Rp 299K",
-    period: "/bulan",
-    desc: "Untuk distributor skala kecil",
-    features: [
-      "Peta sebaran produksi 1 wilayah",
-      "Tren panen bulanan",
-      "Alert cuaca dasar",
-      "Laporan ringkasan mingguan",
-      "Email support",
-    ],
-    notIncluded: ["Analisis multi-wilayah", "API access", "Custom report"],
-    popular: false,
-    color: "from-zinc-600 to-zinc-500",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "Rp 899K",
-    period: "/bulan",
-    desc: "Untuk distributor & instansi pemerintah",
+    id: "instansi",
+    name: "Subscription Intelligence",
+    price: "Rp 3.000.000",
+    period: "/Instansi",
+    desc: "Akses penuh data intelijen untuk instansi",
     features: [
       "Peta sebaran seluruh Indonesia",
       "Tren panen real-time",
@@ -98,27 +81,7 @@ const plans = [
     notIncluded: ["API access"],
     popular: true,
     color: "from-emerald-600 to-emerald-500",
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "Rp 2.5Jt",
-    period: "/bulan",
-    desc: "Untuk korporasi & lembaga besar",
-    features: [
-      "Semua fitur Pro",
-      "API access full",
-      "Custom report generator",
-      "White-label dashboard",
-      "Multi-user management",
-      "Dedicated account manager",
-      "SLA 99.9% uptime",
-      "Integrasi ERP/SAP",
-    ],
-    notIncluded: [],
-    popular: false,
-    color: "from-amber-600 to-amber-500",
-  },
+  }
 ];
 
 const levelColor: Record<string, string> = {

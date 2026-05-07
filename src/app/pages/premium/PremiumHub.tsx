@@ -25,7 +25,7 @@ const premiumFeatures = [
     desc: "Peta sebaran produksi real-time, analisis tren panen, dan peringatan anomali cuaca.",
     badge: "Populer",
     badgeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    price: "Mulai Rp 299K/bln",
+    price: "Rp 3.000.000/Instansi",
     users: "Distributor • Pemerintah",
   },
   {
@@ -36,7 +36,7 @@ const premiumFeatures = [
     desc: "Ringkasan transaksi marketplace, total nilai dan komisi platform secara transparan.",
     badge: "Otomatis",
     badgeColor: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    price: "2.5% per transaksi",
+    price: "Rp 5.000/transaksi",
     users: "Semua Pengguna",
   },
   {
@@ -58,7 +58,7 @@ const premiumFeatures = [
     desc: "Laporan proyeksi produksi jangka panjang, tren komoditas, dan analisis wilayah.",
     badge: "Premium",
     badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    price: "Mulai Rp 150K/laporan",
+    price: "Rp 15.000.000/laporan",
     users: "Perusahaan • Pemerintah",
   },
   {
@@ -69,7 +69,7 @@ const premiumFeatures = [
     desc: "Akses data prediksi panen via API untuk mitra logistik, perbankan, dan asuransi.",
     badge: "Enterprise",
     badgeColor: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-    price: "Mulai Rp 2.5Jt/bln",
+    price: "Rp 20.000.000/perusahaan",
     users: "Mitra Bisnis • Enterprise",
   },
 ];

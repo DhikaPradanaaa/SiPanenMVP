@@ -217,7 +217,10 @@ export function DashboardDistributor() {
               </div>
             </div>
             <div className="flex gap-2">
-              <button className="flex-1 h-9 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold rounded-xl">
+              <button
+                onClick={() => navigate("/buat-kontrak", { state: { petani: p } })}
+                className="flex-1 h-9 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold rounded-xl"
+              >
                 Buat Kontrak
               </button>
               <button className="h-9 px-3 bg-emerald-50 border border-emerald-200 rounded-xl">

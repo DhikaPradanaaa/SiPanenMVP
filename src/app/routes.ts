@@ -22,6 +22,7 @@ import { AnalyticReport } from "./pages/premium/AnalyticReport";
 import { ApiIntegration } from "./pages/premium/ApiIntegration";
 import { Profile } from "./pages/Profile";
 import { SplashScreen } from "./pages/SplashScreen";
+import { BuatKontrak } from "./pages/BuatKontrak";
 
 export const router = createBrowserRouter([
   { path: "/", Component: SplashScreen },
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
   { path: "/marketplace", Component: Marketplace },
   { path: "/notifications", Component: Notifications },
   { path: "/riwayat-kontrak", Component: RiwayatKontrak },
+  { path: "/buat-kontrak", Component: BuatKontrak },
   // Premium & Monetization
   { path: "/premium", Component: PremiumHub },
   { path: "/premium/subscription", Component: SubscriptionDashboard },
