@@ -126,7 +126,15 @@ export function DashboardDistributor() {
 
       {/* Pesanan Terbaru */}
       <div className="px-6 mb-6">
-        <h3 className="text-zinc-900 font-bold mb-3">Pesanan Terbaru</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-zinc-900 font-bold">Pesanan Terbaru</h3>
+          <button 
+            onClick={() => navigate("?tab=pesanan")}
+            className="text-emerald-600 text-xs font-bold hover:text-emerald-700"
+          >
+            Lihat Semua
+          </button>
+        </div>
         {pesananMasuk.slice(0, 2).map((p) => (
           <div key={p.id} className="flex items-center justify-between py-3 border-b border-emerald-100 last:border-0">
             <div>
@@ -391,12 +399,77 @@ export function DashboardDistributor() {
     </div>
   );
 
+  const TabPesanan = () => (
+    <div className="px-6 pt-5">
+      <h2 className="text-xl font-bold text-zinc-900 mb-1">Pesanan Masuk</h2>
+      <p className="text-zinc-500 text-sm mb-5">Purchase Order dari Perusahaan</p>
+
+      <div className="space-y-4">
+        {pesananMasuk.map((p) => (
+          <div key={p.id} className="bg-white border border-emerald-200 rounded-2xl p-4 hover:border-emerald-400 transition-colors">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-emerald-600 font-bold text-xs">{p.id}</span>
+              <span className={`text-[9px] px-2 py-0.5 rounded-full border font-medium ${statusPOColors[p.status] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"}`}>{p.status}</span>
+            </div>
+            <h3 className="text-zinc-900 font-bold text-sm mb-1">{p.perusahaan}</h3>
+            <div className="grid grid-cols-2 gap-2 mb-3 mt-3">
+              <div>
+                <div className="text-zinc-500 text-[10px]">Komoditas</div>
+                <div className="text-zinc-900 text-sm font-medium">{p.komoditas}</div>
+              </div>
+              <div>
+                <div className="text-zinc-500 text-[10px]">Volume</div>
+                <div className="text-zinc-900 text-sm font-medium">{p.volume}</div>
+              </div>
+              <div>
+                <div className="text-zinc-500 text-[10px]">Deadline</div>
+                <div className="text-zinc-900 text-sm font-medium">{p.deadline}</div>
+              </div>
+              <div>
+                <div className="text-zinc-500 text-[10px]">Nilai PO</div>
+                <div className="text-emerald-600 text-sm font-bold">{p.nilai}</div>
+              </div>
+            </div>
+            
+            {p.status === "Baru" && (
+              <div className="flex gap-2 mt-4 pt-4 border-t border-emerald-100">
+                <button 
+                  onClick={() => alert("Pesanan Ditolak")}
+                  className="flex-1 py-2 bg-red-50 text-red-600 font-bold rounded-xl text-xs"
+                >
+                  Tolak
+                </button>
+                <button 
+                  onClick={() => alert("Pesanan Diterima. Status PO diubah menjadi Proses.")}
+                  className="flex-1 py-2 bg-emerald-600 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-500/20"
+                >
+                  Terima PO
+                </button>
+              </div>
+            )}
+            {p.status === "Proses" && (
+              <div className="mt-4 pt-4 border-t border-emerald-100">
+                <button 
+                  onClick={() => alert("Jadwalkan Pengiriman Armada")}
+                  className="w-full py-2 bg-blue-50 text-blue-600 font-bold rounded-xl text-xs flex items-center justify-center gap-2"
+                >
+                  <Truck className="w-4 h-4" /> Jadwalkan Pengiriman
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderTab = () => {
     switch (tab) {
       case "marketplace": return <TabMarketplace />;
       case "gudang": return <TabGudang />;
       case "logistik": return <TabLogistik />;
       case "laporan": return <TabLaporan />;
+      case "pesanan": return <TabPesanan />;
       default: return <TabBeranda />;
     }
   };
