@@ -33,7 +33,7 @@ interface ProfileData {
 
 const profileDataMap: Record<UserRole, ProfileData> = {
   petani: {
-    nama: "Pak Suharto",
+    nama: "Pak Dhika",
     email: "suharto@email.com",
     phone: "+62 812-3456-7890",
     lokasi: "Subang, Jawa Barat",
@@ -41,7 +41,7 @@ const profileDataMap: Record<UserRole, ProfileData> = {
     role: "petani",
     roleLabel: "Petani",
     bergabung: "Januari 2025",
-    isPremium: true,
+    isPremium: false,
     planName: "Premium Pro",
     verified: true,
     bio: "Petani padi & palawija berpengalaman 15 tahun di Subang, Jawa Barat.",
@@ -154,7 +154,7 @@ export function Profile() {
   }, []);
 
   const role = userData?.role || (searchParams.get("role") || "petani") as UserRole;
-  
+
   const baseProfile = profileDataMap[role as UserRole] || profileDataMap["petani"];
   const profile = userData ? {
     ...baseProfile,
@@ -186,16 +186,16 @@ export function Profile() {
       const data = await res.json();
       if (data.url && userData) {
         const userId = localStorage.getItem("userId");
-        if(userId) {
-            await fetch(`http://localhost:5001/api/user/${userId}`, {
-                method: "PUT",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({...userData, foto: data.url})
-            });
-            setUserData({...userData, foto: data.url});
+        if (userId) {
+          await fetch(`http://localhost:5001/api/user/${userId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...userData, foto: data.url })
+          });
+          setUserData({ ...userData, foto: data.url });
         }
       }
-    } catch(err) {
+    } catch (err) {
       console.error("Upload failed", err);
     }
   };
@@ -227,24 +227,23 @@ export function Profile() {
       title: "Pengaturan Akun",
       items: [
         { icon: Edit3, label: "Edit Profil", action: () => setShowEditModal(true), color: "text-emerald-500" },
-        { icon: Lock, label: "Ubah Password", action: () => {}, color: "text-blue-500" },
-        { icon: CreditCard, label: "Langganan & Pembayaran", action: () => navigate("/premium/subscription"), color: "text-amber-500" },
-        { icon: Shield, label: "Keamanan Akun", action: () => {}, color: "text-violet-500" },
+        { icon: Lock, label: "Ubah Password", action: () => { }, color: "text-blue-500" },
+        { icon: Shield, label: "Keamanan Akun", action: () => { }, color: "text-violet-500" },
       ],
     },
     {
       title: "Preferensi",
       items: [
         { icon: Bell, label: "Notifikasi", toggle: true, color: "text-emerald-500" },
-        { icon: Globe, label: "Bahasa", value: "Indonesia", action: () => {}, color: "text-blue-500" },
+        { icon: Globe, label: "Bahasa", value: "Indonesia", action: () => { }, color: "text-blue-500" },
       ],
     },
     {
       title: "Lainnya",
       items: [
-        { icon: HelpCircle, label: "Pusat Bantuan", action: () => {}, color: "text-emerald-500" },
-        { icon: FileText, label: "Syarat & Ketentuan", action: () => {}, color: "text-zinc-400" },
-        { icon: Heart, label: "Beri Rating", action: () => {}, color: "text-red-400" },
+        { icon: HelpCircle, label: "Pusat Bantuan", action: () => { }, color: "text-emerald-500" },
+        { icon: FileText, label: "Syarat & Ketentuan", action: () => { }, color: "text-zinc-400" },
+        { icon: Heart, label: "Beri Rating", action: () => { }, color: "text-red-400" },
       ],
     },
   ];
