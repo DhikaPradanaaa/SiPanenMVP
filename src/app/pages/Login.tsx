@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import imgLogo from "figma:asset/85b54429ff18534590e2881f120f06f05d1f27bf.png";
+
 
 type UserRole = "petani" | "distributor" | "perusahaan" | null;
 
@@ -55,7 +55,7 @@ export function Login() {
       <div className="flex flex-col items-center justify-center pt-12 pb-8 px-6">
         <button onClick={() => navigate("/home")} className="relative -mb-20">
           <div className="relative w-64 h-64 flex items-center justify-center scale-110">
-            <img src={imgLogo} alt="SiPanen" className="w-full h-full object-contain" />
+            <img src="/logo.png" alt="SiPanen" className="w-full h-full object-contain" />
           </div>
         </button>
         <h1 className="relative z-10 text-3xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-500 bg-clip-text text-transparent mb-2">

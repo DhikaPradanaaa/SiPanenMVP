@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import imgLogo from "figma:asset/85b54429ff18534590e2881f120f06f05d1f27bf.png";
+
 
 type UserRole = "petani" | "distributor" | "perusahaan";
 
@@ -64,7 +64,7 @@ export function Register() {
         <button onClick={() => (step === "form" ? setStep("role") : navigate("/home"))} className="p-1 hover:bg-emerald-50 rounded-lg transition-colors">
           <ArrowLeft className="w-6 h-6 text-zinc-800" />
         </button>
-        <img src={imgLogo} alt="SiPanen" className="w-8 h-8 object-contain" />
+        <img src="/logo.png" alt="SiPanen" className="w-8 h-8 object-contain" />
         <h1 className="text-lg font-bold text-zinc-800 tracking-tight">
           {step === "role" ? "Daftar Akun Baru" : `Daftar sebagai ${selectedRole ? roleConfig[selectedRole].label : ""}`}
         </h1>

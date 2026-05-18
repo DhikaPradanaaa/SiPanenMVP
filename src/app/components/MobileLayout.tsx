@@ -8,6 +8,7 @@ import {
   LogOut, User,
 } from "lucide-react";
 import imgLogo from "figma:asset/85b54429ff18534590e2881f120f06f05d1f27bf.png";
+import { FeedbackButton } from "./FeedbackButton";
 
 type UserRole = "petani" | "distributor" | "perusahaan";
 
@@ -24,12 +25,12 @@ const navConfig: Record<UserRole, { path: string; icon: typeof Home; label: stri
     { path: "/dashboard/petani", icon: Home, label: "Beranda" },
     { path: "/dashboard/petani?tab=harga", icon: TrendingUp, label: "Harga" },
     { path: "/dashboard/petani?tab=panen", icon: Leaf, label: "Panen" },
-    { path: "/dashboard/petani?tab=permintaan", icon: ClipboardList, label: "Permintaan" },
-    { path: "/dashboard/petani?tab=transaksi", icon: CreditCard, label: "Transaksi" },
+    { path: "/dashboard/petani?tab=marketplace", icon: ShoppingBag, label: "Pasar" },
+    { path: "/komunitas", icon: Users, label: "Komunitas" },
   ],
   distributor: [
     { path: "/dashboard/distributor", icon: Home, label: "Beranda" },
-    { path: "/dashboard/distributor?tab=pengadaan", icon: ShoppingBag, label: "Pengadaan" },
+    { path: "/dashboard/distributor?tab=marketplace", icon: ShoppingBag, label: "Marketplace" },
     { path: "/dashboard/distributor?tab=gudang", icon: Warehouse, label: "Gudang" },
     { path: "/dashboard/distributor?tab=logistik", icon: Truck, label: "Logistik" },
     { path: "/dashboard/distributor?tab=laporan", icon: Receipt, label: "Laporan" },
@@ -67,7 +68,7 @@ export function MobileLayout({
                 <ArrowLeft className="w-6 h-6 text-zinc-800" />
               </button>
             ) : (
-              <img src={imgLogo} alt="SiPanen" className="w-8 h-8 object-contain" />
+              <img src="/logo.png" alt="SiPanen" className="w-8 h-8 object-contain" />
             )}
             <h1 className="text-lg font-bold text-zinc-800 tracking-tight">{title}</h1>
           </div>
@@ -96,6 +97,9 @@ export function MobileLayout({
       <div className="flex-1 overflow-y-auto pb-20 bg-[#F5FCEF]">
         {children}
       </div>
+
+      {/* Feedback FAB */}
+      <FeedbackButton role={role} />
 
       {/* Bottom Navigation */}
       {showBottomNav && (

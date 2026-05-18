@@ -1,4 +1,30 @@
-# Logs
+# ── Dependency directories ──
+node_modules
+backend/node_modules
+
+# ── Build output ──
+dist
+dist-ssr
+build
+
+# ── Environment variables (SENSITIVE — jangan pernah di-commit!) ──
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+backend/.env
+
+# ── Database (berisi data pengguna) ──
+backend/database.sqlite
+backend/*.sqlite
+backend/*.db
+
+# ── File upload pengguna ──
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ── Log files ──
 logs
 *.log
 npm-debug.log*
@@ -7,19 +33,34 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# ── Vite & tooling cache ──
 *.local
-.env
+.vite
+.cache
 
-# Editor directories and files
+# ── Editor & IDE ──
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# ── OS generated files ──
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ── Netlify ──
+.netlify
+
+# ── Coverage & test output ──
+coverage
+*.lcov

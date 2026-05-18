@@ -18,11 +18,11 @@ const summaryStats = [
   { label: "Margin Bulan Ini", value: "18.4%", icon: TrendingUp, color: "text-emerald-400" },
 ];
 
-const petaniSiapPanen = [
-  { id: 1, nama: "Pak Suharto", lokasi: "Subang", komoditas: "Padi", volume: "8.5 Ton", harga: "Rp 6.100/kg", rating: 4.8 },
-  { id: 2, nama: "Bu Siti Aminah", lokasi: "Karawang", komoditas: "Padi", volume: "12 Ton", harga: "Rp 6.050/kg", rating: 4.6 },
-  { id: 3, nama: "Pak Joko", lokasi: "Kediri", komoditas: "Jagung", volume: "5 Ton", harga: "Rp 4.700/kg", rating: 4.9 },
-  { id: 4, nama: "Pak Agus", lokasi: "Garut", komoditas: "Cabai", volume: "2.5 Ton", harga: "Rp 44.000/kg", rating: 4.5 },
+const marketplaceListings = [
+  { id: 1, nama: "Pak Suharto", lokasi: "Subang", komoditas: "Padi", volume: "8.5 Ton", harga: "Rp 6.100/kg", rating: 4.8, image: "https://images.unsplash.com/photo-1730127564699-9673611b2398?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyaWNlJTIwcGFkZHklMjBmaWVsZCUyMGZhcm18ZW58MXx8fHwxNzczMTI0MTMzfDA&ixlib=rb-4.1.0&q=80&w=400" },
+  { id: 2, nama: "Bu Siti Aminah", lokasi: "Karawang", komoditas: "Padi Unggul", volume: "12 Ton", harga: "Rp 6.050/kg", rating: 4.6, image: "https://images.unsplash.com/photo-1627920769840-692795c378e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmFpbiUyMGhhcnZlc3R8ZW58MXx8fHwxNzczMTk3MjA1fDA&ixlib=rb-4.1.0&q=80&w=400" },
+  { id: 3, nama: "Pak Joko", lokasi: "Kediri", komoditas: "Jagung", volume: "5 Ton", harga: "Rp 4.700/kg", rating: 4.9, image: "https://images.unsplash.com/photo-1649251037465-72c9d378acb6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3JuJTIwZmllbGQlMjBoYXJ2ZXN0fGVufDF8fHx8MTc3MzE5NzIwMHww&ixlib=rb-4.1.0&q=80&w=400" },
+  { id: 4, nama: "Pak Agus", lokasi: "Garut", komoditas: "Cabai", volume: "2.5 Ton", harga: "Rp 44.000/kg", rating: 4.5, image: "https://images.unsplash.com/photo-1771684512112-77cdac82a1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2ZWdldGFibGUlMjBmYXJtJTIwcGxhbnRhdGlvbnxlbnwxfHx8fDE3NzMxOTcyMDF8MA&ixlib=rb-4.1.0&q=80&w=400" },
 ];
 
 const stokGudang = [
@@ -183,49 +183,52 @@ export function DashboardDistributor() {
     </div>
   );
 
-  const TabPengadaan = () => (
+  const TabMarketplace = () => (
     <div className="px-6 pt-5">
-      <h2 className="text-xl font-bold text-zinc-900 mb-1">Pengadaan</h2>
-      <p className="text-zinc-500 text-sm mb-5">Cari petani siap panen & buat kontrak</p>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-xl font-bold text-zinc-900">Marketplace</h2>
+          <p className="text-zinc-500 text-sm">Cari komoditas siap beli dari petani</p>
+        </div>
+      </div>
 
-      <div className="space-y-3">
-        {petaniSiapPanen.map((p) => (
-          <div key={p.id} className="bg-white border border-emerald-200 rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <h3 className="text-zinc-900 font-bold text-sm">{p.nama}</h3>
-                <div className="flex items-center gap-1 text-zinc-500 text-xs">
-                  <MapPin className="w-3 h-3" /> {p.lokasi}
-                </div>
+      <div className="space-y-4">
+        {marketplaceListings.map((p) => (
+          <div key={p.id} className="bg-white border border-emerald-200 rounded-2xl overflow-hidden hover:border-emerald-400 transition-colors">
+            <div className="h-36 w-full relative">
+              <img src={p.image} alt={p.komoditas} className="w-full h-full object-cover" />
+              <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-zinc-900 border border-emerald-200/50">
+                {p.komoditas}
               </div>
-              <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
+              <div className="absolute top-3 right-3 bg-emerald-500 text-white px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-md">
                 ★ {p.rating}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <div>
-                <div className="text-zinc-500 text-[10px]">Komoditas</div>
-                <div className="text-zinc-900 text-sm">{p.komoditas}</div>
+            <div className="p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="text-zinc-900 font-bold text-sm">{p.nama}</h3>
+                  <div className="flex items-center gap-1 text-zinc-500 text-xs mt-0.5">
+                    <MapPin className="w-3 h-3 text-emerald-500" /> {p.lokasi}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-emerald-600 font-bold">{p.harga}</div>
+                  <div className="text-zinc-500 text-[10px] mt-0.5">Tersedia: {p.volume}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-zinc-500 text-[10px]">Volume</div>
-                <div className="text-zinc-900 text-sm">{p.volume}</div>
+              
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => navigate("/buat-kontrak", { state: { petani: p } })}
+                  className="flex-1 h-10 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-500/20"
+                >
+                  Buat Kontrak
+                </button>
+                <button className="w-10 h-10 flex items-center justify-center bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition-colors">
+                  <Phone className="w-4 h-4 text-zinc-500" />
+                </button>
               </div>
-              <div>
-                <div className="text-zinc-500 text-[10px]">Harga</div>
-                <div className="text-emerald-600 text-sm font-bold">{p.harga}</div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigate("/buat-kontrak", { state: { petani: p } })}
-                className="flex-1 h-9 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold rounded-xl"
-              >
-                Buat Kontrak
-              </button>
-              <button className="h-9 px-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                <Phone className="w-4 h-4 text-zinc-500" />
-              </button>
             </div>
           </div>
         ))}
@@ -390,7 +393,7 @@ export function DashboardDistributor() {
 
   const renderTab = () => {
     switch (tab) {
-      case "pengadaan": return <TabPengadaan />;
+      case "marketplace": return <TabMarketplace />;
       case "gudang": return <TabGudang />;
       case "logistik": return <TabLogistik />;
       case "laporan": return <TabLaporan />;

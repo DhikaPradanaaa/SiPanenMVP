@@ -19,7 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import imgLogo from "figma:asset/85b54429ff18534590e2881f120f06f05d1f27bf.png";
+
 
 // ── DATA ──
 
@@ -543,7 +543,7 @@ export function HeroLanding() {
             transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
             className="w-48 h-48 rounded-2xl flex items-center justify-center mx-auto -mb-4"
           >
-            <img src={imgLogo} alt="SiPanen" className="w-full h-full object-contain scale-110" />
+            <img src="/logo.png" alt="SiPanen" className="w-full h-full object-contain scale-110" />
           </motion.div>
           <h2 className="text-xl font-bold text-zinc-900 mb-2">Siap Bertransformasi?</h2>
           <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
@@ -597,7 +597,7 @@ export function HeroLanding() {
       {/* Top Bar */}
       <div className="relative z-20 flex items-center justify-between px-6 pt-5 pb-3">
         <div className="flex items-center gap-2.5">
-          <img src={imgLogo} alt="SiPanen" className="w-10 h-10 object-contain" />
+          <img src="/logo.png" alt="SiPanen" className="w-10 h-10 object-contain" />
           <div className="flex flex-col">
             <span className="text-zinc-800 font-bold text-sm leading-tight">SiPanen</span>
             <span className="text-emerald-600 text-[8px] font-medium leading-tight">Intelijen Pertanian</span>
