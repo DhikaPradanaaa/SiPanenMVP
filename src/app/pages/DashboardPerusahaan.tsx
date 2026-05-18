@@ -66,6 +66,10 @@ export function DashboardPerusahaan() {
   const navigate = useNavigate();
   const tab = searchParams.get("tab") || "beranda";
 
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedPemasok, setSelectedPemasok] = useState<any>(null);
+  const [orderForm, setOrderForm] = useState({ komoditas: "", volume: "", deadline: "" });
+
   const TabBeranda = () => (
     <div>
       <div className="px-6 pt-6 pb-4">
@@ -206,6 +210,16 @@ export function DashboardPerusahaan() {
                 <span key={i} className="text-[10px] px-2 py-1 bg-emerald-50 rounded-lg text-zinc-500">{k}</span>
               ))}
             </div>
+
+            {/* Action */}
+            <div className="mt-4 pt-3 border-t border-emerald-100 flex justify-end">
+              <button 
+                onClick={() => { setSelectedPemasok(p); setShowOrderModal(true); }}
+                className="px-4 py-1.5 bg-emerald-50 text-emerald-600 text-xs font-bold rounded-xl hover:bg-emerald-100 transition-colors"
+              >
+                Buat Order / PO
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -219,7 +233,10 @@ export function DashboardPerusahaan() {
           <h2 className="text-xl font-bold text-zinc-900">Purchase Orders</h2>
           <p className="text-zinc-500 text-sm">Kelola PO massal</p>
         </div>
-        <button className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+        <button 
+          onClick={() => navigate("?tab=pemasok")}
+          className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20"
+        >
           <Plus className="w-5 h-5 text-white" />
         </button>
       </div>
@@ -443,6 +460,70 @@ export function DashboardPerusahaan() {
   return (
     <MobileLayout title="Dashboard Perusahaan" showBottomNav role="perusahaan">
       {renderTab()}
+
+      {/* Order Modal */}
+      {showOrderModal && selectedPemasok && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-bold text-zinc-900 mb-1">Buat Purchase Order</h3>
+            <p className="text-sm text-zinc-500 mb-5">Ke: {selectedPemasok.nama}</p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-zinc-700 mb-1">Komoditas</label>
+                <select 
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500"
+                  value={orderForm.komoditas}
+                  onChange={(e) => setOrderForm({...orderForm, komoditas: e.target.value})}
+                >
+                  <option value="">Pilih Komoditas</option>
+                  {selectedPemasok.komoditas.map((k: string) => (
+                    <option key={k} value={k}>{k}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-700 mb-1">Volume (Ton)</label>
+                <input 
+                  type="number" 
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500"
+                  placeholder="Contoh: 10"
+                  value={orderForm.volume}
+                  onChange={(e) => setOrderForm({...orderForm, volume: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-700 mb-1">Deadline Pengiriman</label>
+                <input 
+                  type="date" 
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500"
+                  value={orderForm.deadline}
+                  onChange={(e) => setOrderForm({...orderForm, deadline: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button 
+                onClick={() => setShowOrderModal(false)}
+                className="flex-1 py-3 bg-zinc-100 text-zinc-600 font-bold rounded-xl text-sm"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={() => {
+                  alert("Order PO berhasil dikirim ke distributor!");
+                  setShowOrderModal(false);
+                  setOrderForm({komoditas: "", volume: "", deadline: ""});
+                }}
+                className="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl text-sm shadow-lg shadow-emerald-500/30"
+              >
+                Kirim PO
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MobileLayout>
   );
 }
