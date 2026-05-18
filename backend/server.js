@@ -48,6 +48,49 @@ const db = new sqlite3.Database(dbPath, (err) => {
         if (err) console.error("Error creating plants table: " + err.message);
       }
     );
+    db.run(
+      `CREATE TABLE IF NOT EXISTS feedback (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId TEXT,
+        role TEXT,
+        kategori TEXT NOT NULL,
+        pesan TEXT NOT NULL,
+        rating INTEGER NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
+      (err) => {
+        if (err) console.error("Error creating feedback table: " + err.message);
+      }
+    );
+    db.run(
+      `CREATE TABLE IF NOT EXISTS komunitas_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId TEXT,
+        nama TEXT NOT NULL,
+        foto TEXT,
+        lokasi TEXT,
+        konten TEXT NOT NULL,
+        foto_post TEXT,
+        likes INTEGER DEFAULT 0,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
+      (err) => {
+        if (err) console.error("Error creating komunitas_posts table: " + err.message);
+      }
+    );
+    db.run(
+      `CREATE TABLE IF NOT EXISTS komunitas_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER NOT NULL,
+        userId TEXT,
+        nama TEXT NOT NULL,
+        konten TEXT NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
+      (err) => {
+        if (err) console.error("Error creating komunitas_comments table: " + err.message);
+      }
+    );
   }
 });
 
@@ -229,6 +272,99 @@ app.get("/api/predictions/:userId", (req, res) => {
     });
 
     res.json(predictions);
+  });
+});
+
+// ── FEEDBACK ROUTES ──
+
+// POST feedback
+app.post("/api/feedback", (req, res) => {
+  const { userId, role, kategori, pesan, rating } = req.body;
+  if (!kategori || !pesan || !rating) {
+    return res.status(400).json({ error: "Data feedback tidak lengkap." });
+  }
+  const sql = `INSERT INTO feedback (userId, role, kategori, pesan, rating) VALUES (?, ?, ?, ?, ?)`;
+  db.run(sql, [userId || null, role || null, kategori, pesan, rating], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(201).json({ id: this.lastID, message: "Feedback berhasil dikirim" });
+  });
+});
+
+// GET all feedback (for admin/debug)
+app.get("/api/feedback", (req, res) => {
+  db.all(`SELECT * FROM feedback ORDER BY createdAt DESC`, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// ── KOMUNITAS ROUTES ──
+
+// GET all posts
+app.get("/api/komunitas", (req, res) => {
+  db.all(`SELECT * FROM komunitas_posts ORDER BY createdAt DESC`, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// POST new post (with optional image)
+const uploadPost = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, path.join(__dirname, "uploads/")),
+    filename: (req, file, cb) => {
+      const suffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      cb(null, "post-" + suffix + path.extname(file.originalname));
+    },
+  }),
+});
+
+app.post("/api/komunitas", uploadPost.single("foto_post"), (req, res) => {
+  const { userId, nama, foto, lokasi, konten } = req.body;
+  if (!nama || !konten) {
+    return res.status(400).json({ error: "Nama dan konten wajib diisi." });
+  }
+  const foto_post = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : null;
+  const sql = `INSERT INTO komunitas_posts (userId, nama, foto, lokasi, konten, foto_post) VALUES (?, ?, ?, ?, ?, ?)`;
+  db.run(sql, [userId || null, nama, foto || null, lokasi || null, konten, foto_post], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(201).json({ id: this.lastID, message: "Post berhasil dibuat" });
+  });
+});
+
+// POST like toggle
+app.post("/api/komunitas/:id/like", (req, res) => {
+  const { id } = req.params;
+  const { increment } = req.body; // true = like, false = unlike
+  const sql = increment
+    ? `UPDATE komunitas_posts SET likes = likes + 1 WHERE id = ?`
+    : `UPDATE komunitas_posts SET likes = MAX(0, likes - 1) WHERE id = ?`;
+  db.run(sql, [id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Like diperbarui" });
+  });
+});
+
+// GET comments for a post
+app.get("/api/komunitas/:id/comments", (req, res) => {
+  const { id } = req.params;
+  db.all(`SELECT * FROM komunitas_comments WHERE post_id = ? ORDER BY createdAt ASC`, [id], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// POST a comment
+app.post("/api/komunitas/:id/comments", (req, res) => {
+  const { id } = req.params;
+  const { userId, nama, konten } = req.body;
+  if (!nama || !konten) {
+    return res.status(400).json({ error: "Nama dan konten komentar wajib diisi." });
+  }
+  const sql = `INSERT INTO komunitas_comments (post_id, userId, nama, konten) VALUES (?, ?, ?, ?)`;
+  db.run(sql, [id, userId || null, nama, konten], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(201).json({ id: this.lastID, message: "Komentar berhasil ditambahkan" });
   });
 });
 

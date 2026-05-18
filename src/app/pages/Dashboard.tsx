@@ -1,5 +1,5 @@
 import { Sprout, TrendingUp, Calendar, Package, Plus, Map, BarChart2, Sparkles } from "lucide-react";
-import imgLogo from "figma:asset/85b54429ff18534590e2881f120f06f05d1f27bf.png";
+
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export function Dashboard() {
             </p>
           </div>
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center">
-            <img src={imgLogo} alt="SiPanen" className="w-14 h-14 object-contain" />
+            <img src="/logo.png" alt="SiPanen" className="w-14 h-14 object-contain" />
           </div>
         </div>
 

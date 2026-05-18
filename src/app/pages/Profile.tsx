@@ -5,9 +5,10 @@ import {
   ChevronRight, Bell, Globe, Moon, LogOut, Camera, Edit3, Star,
   Lock, HelpCircle, FileText, Heart, Settings, CreditCard, Leaf,
   Truck, Factory, CheckCircle2, AlertTriangle, Sparkles, Award,
-  ToggleLeft, ToggleRight,
+  ToggleLeft, ToggleRight, MessageSquarePlus,
 } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { FeedbackButton } from "../components/FeedbackButton";
 
 // ── ROLE-SPECIFIC PROFILE DATA ──
 
@@ -399,6 +400,14 @@ export function Profile() {
             </div>
           </div>
         ))}
+
+        {/* Umpan Balik Section */}
+        <div className="px-5 mb-5">
+          <h3 className="text-zinc-900 font-bold text-sm mb-3">Umpan Balik</h3>
+          <div className="bg-white border border-emerald-200 rounded-2xl overflow-hidden">
+            <FeedbackButton role={role} inline />
+          </div>
+        </div>
 
         {/* Logout */}
         <div className="px-5 mb-10">

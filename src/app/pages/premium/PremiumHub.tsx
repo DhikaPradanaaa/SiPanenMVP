@@ -37,7 +37,7 @@ const premiumFeatures = [
     badge: "Otomatis",
     badgeColor: "bg-blue-500/20 text-blue-400 border-blue-500/30",
     price: "Rp 5.000/transaksi",
-    users: "Semua Pengguna",
+    users: "Distributor • Perusahaan",
   },
   {
     id: "kontrak",
@@ -48,7 +48,7 @@ const premiumFeatures = [
     badge: "Aman",
     badgeColor: "bg-violet-500/20 text-violet-400 border-violet-500/30",
     price: "Rp 25K/kontrak",
-    users: "Petani • Distributor • Perusahaan",
+    users: "Distributor • Perusahaan",
   },
   {
     id: "analitik",

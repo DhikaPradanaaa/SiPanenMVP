@@ -1,5 +1,5 @@
 import { Calendar, MapPin, Ruler, Sprout } from "lucide-react";
-import imgLogo from "figma:asset/85b54429ff18534590e2881f120f06f05d1f27bf.png";
+
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { MobileLayout } from "../components/MobileLayout";
@@ -63,7 +63,7 @@ export function InputDataTanam() {
         <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 mb-6 backdrop-blur-sm">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
-              <img src={imgLogo} alt="SiPanen" className="w-12 h-12 object-contain" />
+              <img src="/logo.png" alt="SiPanen" className="w-12 h-12 object-contain" />
             </div>
             <div>
               <h3 className="font-bold text-zinc-900 mb-2">Catat Aktivitas Tanam</h3>

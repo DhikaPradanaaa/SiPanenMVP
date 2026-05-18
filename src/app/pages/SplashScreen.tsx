@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import imgLogo from "figma:asset/85b54429ff18534590e2881f120f06f05d1f27bf.png";
+
 
 export function SplashScreen() {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ export function SplashScreen() {
           className="w-52 h-52 -mb-12 relative"
         >
           <img
-            src={imgLogo}
+            src="/logo.png"
             alt="SiPanen Logo"
             className="w-full h-full object-contain scale-110"
           />
