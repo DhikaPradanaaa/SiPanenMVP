@@ -351,6 +351,22 @@ export function SmartContract() {
                               ))}
                             </div>
                           </div>
+
+                          {/* Tombol Pembayaran */}
+                          {k.status === "Aktif" && (
+                            <div className="pt-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/pembayaran/${k.id}`);
+                                }}
+                                className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 transition-colors text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                              >
+                                <DollarSign className="w-4 h-4" />
+                                Bayar Kontrak Ini
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )}

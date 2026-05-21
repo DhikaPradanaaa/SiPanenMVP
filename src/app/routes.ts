@@ -24,6 +24,8 @@ import { Profile } from "./pages/Profile";
 import { SplashScreen } from "./pages/SplashScreen";
 import { BuatKontrak } from "./pages/BuatKontrak";
 import { KomunitasPetani } from "./pages/KomunitasPetani";
+import { StatusKontrak } from "./pages/StatusKontrak";
+import { Pembayaran } from "./pages/Pembayaran";
 
 export const router = createBrowserRouter([
   { path: "/", Component: SplashScreen },
@@ -55,4 +57,7 @@ export const router = createBrowserRouter([
   { path: "/premium/kontrak", Component: SmartContract },
   { path: "/premium/analitik", Component: AnalyticReport },
   { path: "/premium/api", Component: ApiIntegration },
+  // Status Kontrak & Pembayaran
+  { path: "/status-kontrak/:id", Component: StatusKontrak },
+  { path: "/pembayaran/:id", Component: Pembayaran },
 ]);

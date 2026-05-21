@@ -14,6 +14,7 @@ import {
   Star,
   Zap,
   Lock,
+  
 } from "lucide-react";
 
 const premiumFeatures = [
