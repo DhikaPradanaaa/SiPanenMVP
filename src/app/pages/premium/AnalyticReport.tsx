@@ -128,7 +128,7 @@ export function AnalyticReport() {
     <div className="flex flex-col h-screen max-w-md mx-auto bg-[#F5FCEF]">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4 bg-white border-b border-emerald-200">
-        <button onClick={() => navigate("/premium")} className="p-1.5 hover:bg-emerald-50 rounded-xl transition-colors">
+        <button onClick={() => navigate("/premium", { replace: true })} className="p-1.5 hover:bg-emerald-50 rounded-xl transition-colors">
           <ArrowLeft className="w-5 h-5 text-zinc-800" />
         </button>
         <div className="flex-1">

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { motion } from "motion/react";
 import {
   ArrowLeft,
@@ -48,7 +48,7 @@ const premiumFeatures = [
     badge: "Aman",
     badgeColor: "bg-violet-500/20 text-violet-400 border-violet-500/30",
     price: "Rp 25K/kontrak",
-    users: "Distributor • Perusahaan",
+    users: "Petani • Distributor • Perusahaan",
   },
   {
     id: "analitik",
@@ -82,12 +82,14 @@ const highlights = [
 
 export function PremiumHub() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const backTo = (location.state as any)?.from ?? "/dashboard/distributor";
 
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto bg-[#F5FCEF]">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4 bg-white border-b border-emerald-200">
-        <button onClick={() => navigate(-1)} className="p-1.5 hover:bg-emerald-50 rounded-xl transition-colors">
+        <button onClick={() => navigate(backTo, { replace: true })} className="p-1.5 hover:bg-emerald-50 rounded-xl transition-colors">
           <ArrowLeft className="w-5 h-5 text-zinc-800" />
         </button>
         <div className="flex items-center gap-2.5 flex-1">

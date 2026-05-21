@@ -143,7 +143,7 @@ export function DashboardPerusahaan() {
       {/* Premium Services CTA */}
       <div className="px-6 mb-6">
         <button
-          onClick={() => navigate("/premium")}
+          onClick={() => navigate("/premium", { state: { from: "/dashboard/perusahaan" } })}
           className="w-full relative overflow-hidden bg-white border border-amber-300 rounded-2xl p-4 text-left group hover:border-amber-400 transition-all duration-300"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(245,158,11,0.06),transparent_60%)]" />

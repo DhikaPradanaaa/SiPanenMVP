@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { MobileLayout } from "../components/MobileLayout";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import {
   Truck, Warehouse, ShoppingBag, Package, TrendingUp, AlertTriangle,
   MapPin, Clock, CheckCircle2, ArrowUpRight, ArrowDownRight, Plus,
@@ -19,10 +20,10 @@ const summaryStats = [
 ];
 
 const marketplaceListings = [
-  { id: 1, nama: "Pak Suharto", lokasi: "Subang", komoditas: "Padi", volume: "8.5 Ton", harga: "Rp 6.100/kg", rating: 4.8, image: "https://images.unsplash.com/photo-1730127564699-9673611b2398?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyaWNlJTIwcGFkZHklMjBmaWVsZCUyMGZhcm18ZW58MXx8fHwxNzczMTI0MTMzfDA&ixlib=rb-4.1.0&q=80&w=400" },
-  { id: 2, nama: "Bu Siti Aminah", lokasi: "Karawang", komoditas: "Padi Unggul", volume: "12 Ton", harga: "Rp 6.050/kg", rating: 4.6, image: "https://images.unsplash.com/photo-1627920769840-692795c378e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmFpbiUyMGhhcnZlc3R8ZW58MXx8fHwxNzczMTk3MjA1fDA&ixlib=rb-4.1.0&q=80&w=400" },
-  { id: 3, nama: "Pak Joko", lokasi: "Kediri", komoditas: "Jagung", volume: "5 Ton", harga: "Rp 4.700/kg", rating: 4.9, image: "https://images.unsplash.com/photo-1649251037465-72c9d378acb6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3JuJTIwZmllbGQlMjBoYXJ2ZXN0fGVufDF8fHx8MTc3MzE5NzIwMHww&ixlib=rb-4.1.0&q=80&w=400" },
-  { id: 4, nama: "Pak Agus", lokasi: "Garut", komoditas: "Cabai", volume: "2.5 Ton", harga: "Rp 44.000/kg", rating: 4.5, image: "https://images.unsplash.com/photo-1771684512112-77cdac82a1f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2ZWdldGFibGUlMjBmYXJtJTIwcGxhbnRhdGlvbnxlbnwxfHx8fDE3NzMxOTcyMDF8MA&ixlib=rb-4.1.0&q=80&w=400" },
+  { id: 1, nama: "Pak Suharto", lokasi: "Subang", komoditas: "Padi", volume: "8.5 Ton", harga: "Rp 6.100/kg", rating: 4.8, image: "/padi.png" },
+  { id: 2, nama: "Bu Siti Aminah", lokasi: "Karawang", komoditas: "Padi Unggul", volume: "12 Ton", harga: "Rp 6.050/kg", rating: 4.6, image: "/padi-unggul.png" },
+  { id: 3, nama: "Pak Joko", lokasi: "Kediri", komoditas: "Jagung", volume: "5 Ton", harga: "Rp 4.700/kg", rating: 4.9, image: "/jagung.png" },
+  { id: 4, nama: "Pak Agus", lokasi: "Garut", komoditas: "Cabai", volume: "2.5 Ton", harga: "Rp 44.000/kg", rating: 4.5, image: "/cabai.png" },
 ];
 
 const stokGudang = [
@@ -169,7 +170,7 @@ export function DashboardDistributor() {
       {/* Premium Services CTA */}
       <div className="px-6 mb-6">
         <button
-          onClick={() => navigate("/premium")}
+          onClick={() => navigate("/premium", { state: { from: "/dashboard/distributor" } })}
           className="w-full relative overflow-hidden bg-white border border-amber-300 rounded-2xl p-4 text-left group hover:border-amber-400 transition-all duration-300"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(245,158,11,0.06),transparent_60%)]" />
@@ -204,7 +205,7 @@ export function DashboardDistributor() {
         {marketplaceListings.map((p) => (
           <div key={p.id} className="bg-white border border-emerald-200 rounded-2xl overflow-hidden hover:border-emerald-400 transition-colors">
             <div className="h-36 w-full relative">
-              <img src={p.image} alt={p.komoditas} className="w-full h-full object-cover" />
+              <ImageWithFallback src={p.image} alt={p.komoditas} className="w-full h-full object-cover" />
               <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-zinc-900 border border-emerald-200/50">
                 {p.komoditas}
               </div>
